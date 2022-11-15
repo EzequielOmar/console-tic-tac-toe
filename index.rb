@@ -18,13 +18,14 @@ class App
             menu_selection = self.handleMenuLoop
             case menu_selection
                 when 'd'
-                    #TODO display change dificulty menu            
+                    self.handleDifficultyMenu
                 when 'm'
-                    #TODO display change mode menu      
+                    self.handleModeMenu
                 when 's'
                     #TODO start game  
             end          
         end
+        # End App
         Interaction.say('Bye! See you soon!')
     end
 
@@ -37,9 +38,26 @@ class App
             if menu_selection
                 return menu_selection
             else
-                Interaction.clear_console
                 Interaction.say('Wrong input, please try again...')
             end
+        end
+    end
+
+    def handleDifficultyMenu
+        menu_selection = nil
+        Interaction.show_difficulty_menu
+        menu_selection = Interaction.ask_input(1, 2, 3)
+        if menu_selection
+            $current_dificulty = menu_selection
+        end
+    end
+
+    def handleModeMenu
+        menu_selection = nil
+        Interaction.show_mode_menu
+        menu_selection = Interaction.ask_input(1, 2, 3)
+        if menu_selection
+            $current_mode = menu_selection
         end
     end
 end

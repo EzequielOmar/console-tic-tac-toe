@@ -34,7 +34,7 @@ module Interaction
     end
 
     def Interaction.get_input(valids = [])
-        if(!valids)
+        if !valids
             return nil
         end
         input = gets.chomp

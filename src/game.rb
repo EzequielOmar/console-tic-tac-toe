@@ -16,9 +16,9 @@ class Game
     def start
         create_players
         until Game.game_is_over(@board) || tie(@board)
-            Interaction.show_board(@board)
             #* Players move
             @players[@p1turn].move(@board)
+            simulation_step
             check_end_game
             advance_turn
         end
@@ -35,9 +35,6 @@ class Game
         end
     end
 
-    def advance_turn
-        @p1turn = !@p1turn
-    end
 
     def Game.game_is_over(b)
         [b[0], b[1], b[2]].uniq.length == 1 ||
@@ -55,11 +52,23 @@ class Game
     end
 
     def check_end_game
-        if(Game.game_is_over(@board))
+        if Game.game_is_over(@board)
             Interaction.show_board(@board)
             Interaction.say("#{ @p1turn ? 'Player 1' : 'Player 2' } Wins!!!  With #{ @players[@p1turn].symbol } symbol")
-        elsif(tie(@board))
+        elsif tie(@board)
             Interaction.say('Game over, it was a tie')
         end
+    end
+
+    def simulation_step
+        if MODES[@mode] == 'computer VS computer'
+            Interaction.show_board(@board)
+            #* Ask for any input to advance simulation
+            Interaction.get_input()
+        end
+    end
+
+    def advance_turn
+        @p1turn = !@p1turn
     end
 end

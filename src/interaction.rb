@@ -5,11 +5,11 @@ module Interaction
         puts '*---------------------------------------*'
     end
         
-    def Interaction.show_menu
+    def Interaction.show_menu(curr_dif, curr_mode)
         puts '|MENU| Enter:'
         puts "  [s] to start game"
-        puts "  [d] to change difficulty (current: '#{ DIFFICULTYS[$current_dificulty] }')"
-        puts "  [m] to change game mode (current: '#{ MODES[$current_mode] }')"
+        puts "  [d] to change difficulty (current: '#{ DIFFICULTYS[curr_dif] }')"
+        puts "  [m] to change game mode (current: '#{ MODES[curr_mode] }')"
         puts "  [q] to quit"
     end
 
@@ -29,16 +29,23 @@ module Interaction
         puts "  [any] to cancel"
     end
 
-    def Interaction.ask_input(*valids)
+    def Interaction.show_board(board)
+        puts " #{board[0]} | #{board[1]} | #{board[2]} \n———.———.———\n #{board[3]} | #{board[4]} | #{board[5]} \n———.———.———\n #{board[6]} | #{board[7]} | #{board[8]} \n"
+    end
+
+    def Interaction.get_input(valids = [])
+        if(!valids)
+            return nil
+        end
         input = gets.chomp
+        #* Clear console -always- right after user input
         Interaction.clear_console
-        if input.to_i > 0 and valids.include?(input.to_i)
+        if input.match?(/\A\d+\Z/) && valids.include?(input.to_i)
             return input.to_i
         elsif valids.include?(input)
             return input
-        else
-            return nil
         end
+        return nil
     end
 
     def Interaction.clear_console

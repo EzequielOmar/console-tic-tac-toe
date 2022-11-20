@@ -10,7 +10,7 @@ MODES = { 1 => 'human VS computer', 2 => 'human VS human', 3 => 'computer VS com
 class App
     #* App variables
     @@current_dificulty = 1;
-    @@current_mode = 2;
+    @@current_mode = 1;
 
     def start
         Interaction.show_welcome_message
@@ -26,7 +26,8 @@ class App
                 when 's'
                     game = Game.new(@@current_dificulty, @@current_mode)
                     game.start
-            end          
+                    game = nil    
+            end      
         end
         #* End App
         Interaction.say('Bye! See you soon!')

@@ -12,7 +12,7 @@ class Cpu < Player
         until computer_spot
             computer_spot = check_for_middle(board)
             if !computer_spot
-                computer_spot = get_best_move(board)
+                computer_spot = get_move(board)
                 if spot_is_correct(board, computer_spot) 
                     board[computer_spot] = @symbol
                 else
@@ -31,25 +31,46 @@ class Cpu < Player
         end
     end
 
-    def get_best_move(board)
-        best_move = nil
+    def get_move(board)
+        move = nil
         available_spaces = get_available_spaces(board)
-        available_spaces.each do |as|
-            if @difficulty > 2
-                best_move = check_opponent_winner_move(board, as)
-            end
-            if @difficulty > 1
-                best_move = check_winner_move(board, as)
-            end
-            if !best_move 
+        if DIFFICULTYS[@difficulty] == 'easy'
+            move = just_pick_random(available_spaces)
+        elsif DIFFICULTYS[@difficulty] == 'medium'
+            #* Get the winner move, or opponent winners move
+            available_spaces.each do |as|
+                board[as.to_i] = @symbol
+                if Game.game_is_over(board)
+                    move = as.to_i
+                    board[as.to_i] = as
+                else
+                    board[as.to_i] = @opponent_symbol
+                    if Game.game_is_over(board)
+                        move = as.to_i
+                        board[as.to_i] = as
+                    else
+                        board[as.to_i] = as
+                    end
+                end
+            end 
+        elsif DIFFICULTYS[@difficulty] == 'hard'
+            #* Get best possible move
+            best_score = -1000
+            available_spaces.each do |as|
+                board[as.to_i] = @symbol
+                move_score = nil
+                move_score = evaluate_best_move(board, false, 0)
                 board[as.to_i] = as
+                if move_score > best_score
+                    best_score = move_score
+                    move = as.to_i
+                end
             end
         end
-        if best_move
-            return best_move
+        if move
+            return move
         else
-            n = rand(0..available_spaces.count)
-            return available_spaces[n].to_i
+            return just_pick_random(available_spaces)
         end
     end
 
@@ -63,22 +84,56 @@ class Cpu < Player
         return available_spaces
     end
 
-    def check_winner_move(board, as)
-        board[as.to_i] = @symbol
-        if Game.game_is_over(board)
-            best_move = as.to_i
-            return best_move
-        end
-        return nil
+    def just_pick_random(available_spaces)
+        n = rand(0..available_spaces.count)
+        return available_spaces[n].to_i
     end
-    
-    def check_opponent_winner_move(board, as)
-        board[as.to_i] = @opponent_symbol
-        if Game.game_is_over(board)
-            best_move = as.to_i
-            return best_move
+
+    def evaluate_best_move(board, playing_to_win, depth = 0)
+        if player_wins(board, @symbol)
+            return 10
         end
-        return nil
+        if player_wins(board, @opponent_symbol)
+            return -10
+        end
+        if Game.tie(board)
+            return 0
+        end
+        available_spaces = get_available_spaces(board)
+        if playing_to_win
+            best = -1000
+            available_spaces.each do |as|
+                board[as.to_i] = @symbol
+                current_score = evaluate_best_move(board, !playing_to_win, depth + 1)
+                if current_score > best
+                    best = current_score
+                end
+                board[as.to_i] = as
+            end 
+            return best
+        else  
+            best = 1000
+            available_spaces.each do |as|
+                board[as.to_i] = @opponent_symbol
+                current_score = evaluate_best_move(board,!playing_to_win, depth + 1)
+                if current_score < best
+                    best = current_score
+                end
+                board[as.to_i] = as
+            end
+            return best
+        end
+    end
+
+    def player_wins(b, symbol)
+        ([b[0], b[1], b[2]].uniq.length == 1 && [b[0], b[1], b[2]].uniq[0] == symbol) ||
+        ([b[3], b[4], b[5]].uniq.length == 1 && [b[3], b[4], b[5]].uniq[0] == symbol) ||
+        ([b[6], b[7], b[8]].uniq.length == 1 && [b[6], b[7], b[8]].uniq[0] == symbol) ||
+        ([b[0], b[3], b[6]].uniq.length == 1 && [b[0], b[3], b[6]].uniq[0] == symbol) ||
+        ([b[1], b[4], b[7]].uniq.length == 1 && [b[1], b[4], b[7]].uniq[0] == symbol) ||
+        ([b[2], b[5], b[8]].uniq.length == 1 && [b[2], b[5], b[8]].uniq[0] == symbol) ||
+        ([b[0], b[4], b[8]].uniq.length == 1 && [b[0], b[4], b[8]].uniq[0] == symbol) ||
+        ([b[2], b[4], b[6]].uniq.length == 1 && [b[2], b[4], b[6]].uniq[0] == symbol)
     end
 
     def spot_is_correct(board, computer_spot)

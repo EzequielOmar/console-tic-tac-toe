@@ -15,7 +15,7 @@ class Game
     
     def start
         create_players
-        until Game.game_is_over(@board) || tie(@board)
+        until Game.game_is_over(@board) || Game.tie(@board)
             #* Players move
             @players[@p1turn].move(@board)
             simulation_step
@@ -47,7 +47,7 @@ class Game
         [b[2], b[4], b[6]].uniq.length == 1
     end
 
-    def tie(b)
+    def Game.tie(b)
         b.all? { |s| s == @p1_symbol || s == @p2_symbol }
     end
 
@@ -55,7 +55,7 @@ class Game
         if Game.game_is_over(@board)
             Interaction.show_board(@board)
             Interaction.say("#{ @p1turn ? 'Player 1' : 'Player 2' } Wins!!!  With #{ @players[@p1turn].symbol } symbol")
-        elsif tie(@board)
+        elsif Game.tie(@board)
             Interaction.say('Game over, it was a tie')
         end
     end
